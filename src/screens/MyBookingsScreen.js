@@ -1,136 +1,99 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { typography } from '../styles/Typography';
 
 const MyBookingsScreen = () => {
   const navigation = useNavigation();
-  const [activeTab, setActiveTab] = useState('All');
+  const [activeTab, setActiveTab] = useState('Requested');
 
   const bookings = [
-    { id: '1', status: 'Confirmed', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', name: 'Sachin Doe', contact: '0987654321', farmArea: '21 Acres', crop: 'Crop name', temperature: '24°', humidity: '2%', location: 'Pratapgarh, Uttarpradesh', date: '24/08/2024 2:00 Pm' },
-    { id: '2', status: 'Quote received', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', name: 'Sachin Doe', contact: '0987654321', farmArea: '21 Acres', crop: 'Crop name', temperature: '24°', humidity: '2%', location: 'Pratapgarh, Uttarpradesh', date: '24/08/2024 2:00 Pm' },
-    { id: '3', status: 'Completed', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', name: 'Sachin Doe', contact: '0987654321', farmArea: '21 Acres', crop: 'Crop name', temperature: '24°', humidity: '2%', location: 'Pratapgarh, Uttarpradesh', date: '24/08/2024 2:00 Pm' },
-    { id: '4', status: 'Requested', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', name: 'Sachin Doe', contact: '0987654321', farmArea: '21 Acres', crop: 'Crop name', temperature: '24°', humidity: '2%', location: 'Pratapgarh, Uttarpradesh', date: '24/08/2024 2:00 Pm' },
-    { id: '5', status: 'Rejected', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', name: 'Sachin Doe', contact: '0987654321', farmArea: '21 Acres', crop: 'Crop name', temperature: '24°', humidity: '2%', location: 'Pratapgarh, Uttarpradesh', date: '24/08/2024 2:00 Pm' },
+    { id: 'AB123456', status: 'Requested', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', name: 'Sachin Doe', contact: '****', farmArea: '21 Acres', crop: 'Crop name', temperature: '24°', location: 'Pratapgarh, Uttarpradesh', date: '24/08/2024 2:00 PM' },
+    { id: 'AB123451', status: 'Requested', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', name: 'Sachin Doe', contact: '****', farmArea: '21 Acres', crop: 'Crop name', temperature: '24°', location: 'Pratapgarh, Uttarpradesh', date: '24/08/2024 2:00 PM' },
+    { id: 'AB123457', status: 'Confirmed', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', name: 'John Smith', contact: '1234567890', farmArea: '15 Acres', crop: 'Wheat', temperature: '22°', location: 'Lucknow, Uttarpradesh', date: '25/08/2024 3:00 PM' },
+    { id: 'AB123453', status: 'Confirmed', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', name: 'John Smith', contact: '1234567890', farmArea: '15 Acres', crop: 'Wheat', temperature: '22°', location: 'Lucknow, Uttarpradesh', date: '25/08/2024 3:00 PM' },
+    { id: 'AB123458', status: 'Closed', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', name: 'Emma Brown', contact: '9876543210', farmArea: '18 Acres', crop: 'Rice', temperature: '26°', location: 'Varanasi, Uttarpradesh', date: '23/08/2024 1:00 PM' },
+    { id: 'AB123459', status: 'Closed', address: 'Lorem ipsum dolor sit amet, street , Area, City, 560066', name: 'Emma Brown', contact: '9876543210', farmArea: '18 Acres', crop: 'Rice', temperature: '26°', location: 'Varanasi, Uttarpradesh', date: '23/08/2024 1:00 PM' },
   ];
 
-  const filteredBookings = activeTab === 'All' ? bookings : bookings.filter(booking => {
-    if (activeTab === 'Ongoing') return ['Confirmed', 'Quote received', 'Requested'].includes(booking.status);
-    if (activeTab === 'Closed') return ['Completed', 'Rejected'].includes(booking.status);
-    return false;
-  });
+  const filteredBookings = bookings.filter(booking => booking.status === activeTab);
 
   const renderBookingItem = ({ item }) => (
+    
     <TouchableOpacity
-      style={styles.bookingItem}
+      style={styles.bookingCard}
       onPress={() => {
         switch (item.status) {
           case 'Requested':
-            navigation.navigate('RequestedBooking', { booking: item });
-            break;
-          case 'Quote received':
-            navigation.navigate('QuoteReceived', { booking: item });
+            navigation.navigate('RequestedBookingDetails', { booking: item });
             break;
           case 'Confirmed':
-            navigation.navigate('ConfirmedBooking', { booking: item });
+            navigation.navigate('ConfirmedBookingDetails', { booking: item });
             break;
-          case 'Completed':
-            navigation.navigate('CompletedBooking', { booking: item });
+          case 'Closed':
+            navigation.navigate('CompletedBookingDetails', { booking: item });
             break;
-          case 'Rejected':
-            // Handle rejected booking navigation if needed
+          default:
+            // Handle other statuses if needed
             break;
         }
-      }}
-    >
-      <View style={styles.bookingHeader}>
-        <View style={styles.addressContainer}>
-          <Image source={require('../../assets/location-icon.png')} style={styles.locationIcon} />
-          <Text style={[styles.bookingAddress, typography['sans-regular']]}>{item.address}</Text>
-        </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusBgColor(item.status) }]}>
-          <Text style={[styles.statusText, { color: getStatusColor(item.status) }, typography['sans-medium']]}>{item.status}</Text>
-        </View>
+      }}    >
+      <Text style={styles.bookingId}>#{item.id}</Text>
+      <View style={styles.locationContainer}>
+        <Image source={require('../../assets/location-icon.png')} style={styles.locationIcon} />
+        <Text style={styles.address}>{item.address}</Text>
       </View>
-      <Text style={[styles.bookingInfo, typography['sans-regular']]}>Booking Name: {item.name}</Text>
-      <Text style={[styles.bookingInfo, typography['sans-regular']]}>Contact number: {item.contact}</Text>
-      <View style={styles.infoRow}>
-        <Text style={[styles.bookingInfo, typography['sans-regular']]}>Farm Area: {item.farmArea}</Text>
-        <Text style={[styles.bookingInfo, typography['sans-regular']]}>Crop: {item.crop}</Text>
-      </View>
-      <View style={styles.bookingFooter}>
-        <View style={styles.weatherContainer}>
-          <Text style={[styles.temperature, typography['sans-bold']]}>{item.temperature}</Text>
-          <Text style={[styles.humidity, typography['sans-regular']]}>{item.humidity} humidity</Text>
-          <Text style={[styles.location, typography['sans-regular']]}>{item.location}</Text>
+      <Text style={styles.bookingDetail}>Booking Name : {item.name}</Text>
+      <Text style={styles.bookingDetail}>Contact number : {item.contact}</Text>
+      <Text style={styles.bookingDetail}>Farm Area : {item.farmArea}</Text>
+      <Text style={styles.bookingDetail}>Crop : {item.crop}</Text>
+      <View style={styles.weatherContainer}>
+        <View style={styles.temperatureContainer}>
+          <Text style={styles.temperature}>{item.temperature}</Text>
+          <Text style={styles.location}>{item.location}</Text>
+          <Text style={styles.weather}>Mostly sunny</Text>
         </View>
-        <Text style={[styles.date, typography['sans-regular']]}>{item.date}</Text>
+        <Text style={styles.date}>{item.date}</Text>
       </View>
+      {activeTab === 'Requested' && (
+        <View style={styles.actionContainer}>
+          <TouchableOpacity style={styles.rejectButton}>
+            <Text style={styles.rejectButtonText}>Reject</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.acceptButton}>
+            <Text style={styles.acceptButtonText}>Accept</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </TouchableOpacity>
   );
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Confirmed':
-      case 'Quote received':
-      case 'Requested':
-        return '#000000';
-      case 'Completed':
-        return '#51B123';
-      case 'Rejected':
-        return '#E40B0B';
-      default:
-        return '#000000';
-    }
-  };
-
-  const getStatusBgColor = (status) => {
-    switch (status) {
-      case 'Confirmed':
-      case 'Quote received':
-      case 'Requested':
-        return '#B1B1B1';
-      case 'Completed':
-        return '#E8F5E9';
-      case 'Rejected':
-        return '#FFEBEE';
-      default:
-        return '#B1B1B1';
-    }
-  };
-
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, typography['sans-bold']]}>My Bookings</Text>
+      <Image source={require('../../assets/chirag-white-screen-logo.png')} style={styles.logo} resizeMode="contain" />
+      <View style={styles.header}>
+
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Image source={require('../../assets/back-icon.png')} style={styles.backIcon} />
+        </TouchableOpacity>
+        <Text style={styles.title}>Bookings</Text>
+      </View>
       <View style={styles.tabContainer}>
-        {['All', 'Ongoing', 'Closed'].map((tab) => (
+        {['Requested', 'Confirmed', 'Closed'].map((tab) => (
           <TouchableOpacity
             key={tab}
             style={[styles.tab, activeTab === tab && styles.activeTab]}
             onPress={() => setActiveTab(tab)}
           >
-            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText, typography['sans-medium']]}>{tab}</Text>
+            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>{tab}</Text>
           </TouchableOpacity>
         ))}
       </View>
-      {filteredBookings.length > 0 ? (
-        <FlatList
-          data={filteredBookings}
-          renderItem={renderBookingItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.bookingList}
-        />
-      ) : (
-        <View style={styles.emptyContainer}>
-          <Image source={require('../../assets/no-bookings.png')} style={styles.emptyImage} />
-          <Text style={[styles.emptyText, typography['sans-bold']]}>No Bookings Yet</Text>
-          <Text style={[styles.emptySubtext, typography['sans-regular']]}>You don't have any bookings right now. Book Your first service</Text>
-          <TouchableOpacity style={styles.bookButton} onPress={() => navigation.navigate('BookService')}>
-            <Text style={[styles.bookButtonText, typography['sans-bold']]}>Book your first service</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      <FlatList
+        data={filteredBookings}
+        renderItem={renderBookingItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.bookingList}
+      />
     </View>
   );
 };
@@ -139,138 +102,143 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  backIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 15,
   },
   title: {
     fontSize: 24,
-    marginBottom: 20,
+    fontWeight: 'bold',
+    color: '#000000',
   },
   tabContainer: {
     flexDirection: 'row',
-    marginBottom: 20,
+    justifyContent: 'space-around',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
   },
   tab: {
-    flex: 1,
     paddingVertical: 10,
-    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   activeTab: {
     backgroundColor: '#000000',
-    borderRadius: 5,
+    borderRadius: 20,
   },
   tabText: {
     fontSize: 16,
-    color: '#808080',
+    color: '#000000',
   },
   activeTabText: {
-    color: '#E8E8E8',
-    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   bookingList: {
-    paddingBottom: 20,
+    padding: 15,
   },
-  bookingItem: {
+  bookingCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  bookingHeader: {
+  bookingId: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  locationContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
   },
-  addressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
   locationIcon: {
-    width: 16,
-    height: 16,
+    width: 20,
+    height: 20,
     marginRight: 5,
   },
-  bookingAddress: {
+  address: {
     fontSize: 14,
-    color: '#000000',
-    flex: 1,
+    color: '#666666',
   },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    fontSize: 12,
-  },
-  bookingInfo: {
+  bookingDetail: {
     fontSize: 14,
     marginBottom: 5,
-    color: '#000000',
   },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  bookingFooter: {
+  weatherContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
     marginTop: 10,
   },
-  weatherContainer: {
+  temperatureContainer: {
     flexDirection: 'column',
   },
   temperature: {
-    fontSize: 18,
-    color: '#000000',
-  },
-  humidity: {
-    fontSize: 12,
-    color: '#808080',
+    fontSize: 24,
+    fontWeight: 'bold',
   },
   location: {
     fontSize: 12,
-    color: '#808080',
+    color: '#666666',
+  },
+  weather: {
+    fontSize: 12,
+    color: '#666666',
   },
   date: {
-    fontSize: 12,
-    color: '#808080',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
-  emptyContainer: {
+  actionContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+  },
+  rejectButton: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#000000',
+    padding: 10,
+    borderRadius: 5,
+    marginRight: 10,
     alignItems: 'center',
   },
-  emptyImage: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain',
-    marginBottom: 20,
-  },
-  emptyText: {
-    fontSize: 18,
-    marginBottom: 10,
+  rejectButtonText: {
     color: '#000000',
+    fontWeight: 'bold',
   },
-  emptySubtext: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 20,
-    color: '#808080',
-  },
-  bookButton: {
+  acceptButton: {
+    flex: 1,
     backgroundColor: '#000000',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
+    padding: 10,
     borderRadius: 5,
+    marginLeft: 10,
+    alignItems: 'center',
   },
-  bookButtonText: {
+  acceptButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  logo: {
+    width: 200,
+    height: 50,
+    marginTop: 10,
   },
 });
 

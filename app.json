@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ChiragFarmersApp",
+    "name": "ChiragRunnerApp",
     "slug": "ChiragFarmersApp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,37 +12,60 @@
       "backgroundColor": "#ffffff"
     },
     "fonts": [
-    {
-      "asset": "assets/fonts/PublicSans-Regular.ttf",
-      "family": "PublicSans-Regular"
-    },
-    {
-      "asset": "assets/fonts/PublicSans-Medium.ttf",
-      "family": "PublicSans-Medium"
-    },
-    {
-      "asset": "assets/fonts/PublicSans-Bold.ttf",
-      "family": "PublicSans-Bold"
-    }
-  ],
+      {
+        "asset": "assets/fonts/PublicSans-Regular.ttf",
+        "family": "PublicSans-Regular"
+      },
+      {
+        "asset": "assets/fonts/PublicSans-Medium.ttf",
+        "family": "PublicSans-Medium"
+      },
+      {
+        "asset": "assets/fonts/PublicSans-Bold.ttf",
+        "family": "PublicSans-Bold"
+      }
+    ],
     "ios": {
       "supportsTablet": true,
       "config": {
         "googleMapsApiKey": "AIzaSyCdj_dOlzxfE-I9dcSOz4RJj27nmzeFlH4"
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app needs access to location when open.",
+        "NSLocationAlwaysUsageDescription": "This app needs access to location when in the background."
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },"config": {
+      },
+      "config": {
         "googleMaps": {
           "apiKey": "AIzaSyCdj_dOlzxfE-I9dcSOz4RJj27nmzeFlH4"
         }
-      }
+      },
+      "package": "com.yash091099.ChiragFarmersApp",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow ChiragFarmersApp to use your location."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "6d3f4e75-53b5-4bb8-aa15-b7cbdcf342b3"
+      }
     }
   }
 }

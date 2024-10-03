@@ -1,23 +1,42 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import * as Font from 'expo-font';
-
-const { width, height } = Dimensions.get('window');
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+  FlatList,
+  SafeAreaView,
+} from "react-native";
+import { useTranslation } from "react-i18next";
+import { StatusBar } from "expo-status-bar";
+import * as Font from "expo-font";
+import i18n, { changeLanguage } from "../services/i18n"; // Make sure this path is correct
+const { width, height } = Dimensions.get("window");
 
 const SplashScreens = ({ navigation }) => {
+  const { t, i18n } = useTranslation();
+
   const [currentScreen, setCurrentScreen] = useState(0);
-  const [selectedLanguage, setSelectedLanguage] = useState('English');
+  const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const flatListRef = useRef(null);
-  const button_image = require('../../assets/button-arrow.png');
+  const button_image = require("../../assets/button-arrow.png");
+
+  const handleLanguageSelect = async (language) => {
+    const languageCode = language === "English" ? "en" : "hi";
+    await changeLanguage(languageCode);
+    setSelectedLanguage(language);
+    console.log("Language changed to:", languageCode);
+  };
 
   useEffect(() => {
     async function loadFonts() {
       await Font.loadAsync({
-        'PublicSans-Regular': require('../../assets/fonts/PublicSans-Regular.ttf'),
-        'PublicSans-Medium': require('../../assets/fonts/PublicSans-Medium.ttf'),
-        'PublicSans-Bold': require('../../assets/fonts/PublicSans-Bold.ttf'),
+        "PublicSans-Regular": require("../../assets/fonts/PublicSans-Regular.ttf"),
+        "PublicSans-Medium": require("../../assets/fonts/PublicSans-Medium.ttf"),
+        "PublicSans-Bold": require("../../assets/fonts/PublicSans-Bold.ttf"),
       });
       setFontsLoaded(true);
     }
@@ -26,65 +45,76 @@ const SplashScreens = ({ navigation }) => {
 
   const screens = [
     {
-      type: 'logo',
-      logo: require('../../assets/chirag-logo.png'),
+      type: "logo",
+      logo: require("../../assets/chirag-logo.png"),
       buttonImage: button_image,
-      buttonText: 'Get Started',
+      buttonText: "Get Started",
     },
     {
-      type: 'language',
-      title: 'Welcome to App Name!',
-      subtitle: 'Please select your preferred language',
-      subtext: 'You can change your app language at any time from Profile > Language',
-      languages: ['English', 'हिंदी'],
+      type: "language",
+      title: "Welcome to Chirag Connect",
+      subtitle: "Please select your preferred language",
+      subtext:
+        "You can change your app language at any time from Profile > Language",
+      languages: ["English", "हिंदी"],
     },
     {
-      type: 'info',
-      image: require('../../assets/splash1.png'),
-      title: 'Lorem ipsum dolor sit amet consetuer',
-      subtitle: 'Lorem ipsum dolor sit amet consetuer',
+      type: "info",
+      image: require("../../assets/splash1.png"),
+      title: "Lorem ipsum dolor sit amet consetuer",
+      subtitle:
+        "Lorem ipsum dolor sit amet consetuer Lorem ipsum dolor sit amet consetuer Lorem ipsum dolor sit amet consetuer",
     },
     {
-      type: 'info',
-      image: require('../../assets/splash2.png'),
-      title: 'Lorem ipsum dolor sit amet consetuer',
-      subtitle: 'Lorem ipsum dolor sit amet consetuer',
+      type: "info",
+      image: require("../../assets/splash2.png"),
+      title: "Lorem ipsum dolor sit amet consetuer",
+      subtitle:
+        "Lorem ipsum dolor sit amet consetuer Lorem ipsum dolor sit amet consetuer Lorem ipsum dolor sit amet consetuer",
     },
     {
-      type: 'info',
-      image: require('../../assets/splash3.png'),
-      title: 'Lorem ipsum dolor sit amet consetuer',
-      subtitle: 'Lorem ipsum dolor sit amet consetuer',
+      type: "info",
+      image: require("../../assets/splash3.png"),
+      title: "Lorem ipsum dolor sit amet consetuer",
+      subtitle:
+        "Lorem ipsum dolor sit amet consetuer Lorem ipsum dolor sit amet consetuer Lorem ipsum dolor sit amet consetuer",
     },
   ];
-
-  const handleLanguageSelect = (language) => {
-    setSelectedLanguage(language);
-  };
 
   const handleNext = () => {
     if (currentScreen < screens.length - 1) {
       setCurrentScreen(currentScreen + 1);
-      flatListRef.current?.scrollToIndex({ index: currentScreen + 1, animated: true });
+      flatListRef.current?.scrollToIndex({
+        index: currentScreen + 1,
+        animated: true,
+      });
     } else {
-      navigation.replace('Auth');
+      navigation.replace("Auth");
     }
   };
 
   const renderScreen = ({ item, index }) => {
     switch (item.type) {
-      case 'logo':
+      case "logo":
         return (
           <View style={styles.logoContainer}>
-            <Image source={item.logo} style={styles.logo} resizeMode="contain" />
+            <Image
+              source={item.logo}
+              style={styles.logo}
+              resizeMode="contain"
+            />
           </View>
         );
-      case 'language':
+      case "language":
         return (
           <View style={styles.languageContainer}>
-            <Text style={[styles.title, styles.sansBold]}>{item.title}</Text>
-            <Text style={[styles.subtitle, styles.sansMedium]}>{item.subtitle}</Text>
-            <Text style={[styles.subtext, styles.sansRegular]}>{item.subtext}</Text>
+            <Text style={[styles.title, styles.sansBold]}>{t(item.title)}</Text>
+            <Text style={[styles.subtitle, styles.sansMedium]}>
+              {t(item.subtitle)}
+            </Text>
+            <Text style={[styles.subtext, styles.sansRegular]}>
+              {t(item.subtext)}
+            </Text>
             <View style={styles.languageButtons}>
               {item.languages.map((language, idx) => (
                 <TouchableOpacity
@@ -95,21 +125,46 @@ const SplashScreens = ({ navigation }) => {
                   ]}
                   onPress={() => handleLanguageSelect(language)}
                 >
-                  <Text style={[styles.languageButtonText, styles.sansMedium]}>{language}</Text>
+                  <Text style={[styles.languageButtonText, styles.sansMedium]}>
+                    {language}
+                  </Text>
                   {selectedLanguage === language && (
-                    <Image source={require('../../assets/checkmark.png')} style={styles.checkmark} />
+                    <Image
+                      source={require("../../assets/checkmark.png")}
+                      style={styles.checkmark}
+                    />
                   )}
                 </TouchableOpacity>
               ))}
             </View>
+            <Image
+              source={require("../../assets/drown-bg-splash-2.png")}
+              style={styles.droneImage}
+            />
           </View>
         );
-      case 'info':
+      case "info":
         return (
           <View style={styles.infoContainer}>
-            <Image source={item.image} style={styles.infoImage} />
-            <Text style={[styles.infoTitle, styles.sansBold]}>{item.title}</Text>
-            <Text style={[styles.infoSubtitle, styles.sansMedium]}>{item.subtitle}</Text>
+            <Image
+              source={item.image}
+              style={styles.infoImage}
+              resizeMode="contain"
+            />
+            <View style={styles.infoTextContainer}>
+              <Text style={[styles.infoTitle, styles.sansBold]}>
+                {t(item.title)}
+              </Text>
+              <Text style={[styles.infoSubtitle, styles.sansMedium]}>
+                {t(item.subtitle)}
+              </Text>
+              <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+                <Text style={[styles.nextButtonText, styles.sansBold]}>
+                  {index === screens.length - 1 ? t("Get Started") : t("Next")}
+                </Text>
+                <Image source={button_image} style={styles.buttonImage} />
+              </TouchableOpacity>
+            </View>
           </View>
         );
     }
@@ -121,7 +176,7 @@ const SplashScreens = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <FlatList
         ref={flatListRef}
         data={screens}
@@ -132,35 +187,21 @@ const SplashScreens = ({ navigation }) => {
         showsHorizontalScrollIndicator={false}
         scrollEnabled={false}
       />
-      {currentScreen >= 2 && (
-        <View style={styles.dotsContainer}>
-          {screens.slice(2).map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.dot,
-                currentScreen - 2 === index ? styles.activeDot : null,
-              ]}
-            />
-          ))}
-        </View>
-      )}
       {currentScreen === 0 && (
         <TouchableOpacity style={styles.getStartedButton} onPress={handleNext}>
-          <Text style={[styles.getStartedButtonText, styles.sansBold]}>{screens[0].buttonText}</Text>
+          <Text style={[styles.getStartedButtonText, styles.sansBold]}>
+            {t(screens[0].buttonText)}
+          </Text>
           <Image source={screens[0].buttonImage} style={styles.buttonImage} />
         </TouchableOpacity>
       )}
-      {currentScreen > 0 && (
+      {currentScreen === 1 && (
         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
           <Text style={[styles.nextButtonText, styles.sansBold]}>
-            {currentScreen === screens.length - 1 ? 'Get Started' : 'Next'}
+            {t("Next")}
           </Text>
           <Image source={button_image} style={styles.buttonImage} />
         </TouchableOpacity>
-      )}
-      {currentScreen === 1 && (
-        <Image source={require('../../assets/drown-bg-splash-2.png')} style={styles.droneImage} />
       )}
     </SafeAreaView>
   );
@@ -168,159 +209,156 @@ const SplashScreens = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "#000000",
     flex: 1,
-    backgroundColor: '#000000',
   },
   logoContainer: {
     width,
-    height: height * 0.8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    height,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000000",
   },
   logo: {
     width: width * 0.6,
     height: width * 0.2,
   },
   getStartedButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderColor: '#FFFFFF',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderColor: "#FFFFFF",
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 40,
     paddingVertical: 15,
-    position: 'absolute',
+    position: "absolute",
     bottom: 40,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   getStartedButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
     marginRight: 10,
   },
   languageContainer: {
     width,
+    height,
     paddingHorizontal: 20,
     paddingTop: 50,
+    backgroundColor: "#FFFFFF",
   },
   title: {
-    color: '#FFFFFF',
+    color: "#121212",
     fontSize: 24,
     marginBottom: 10,
   },
   subtitle: {
-    color: '#FFFFFF',
+    color: "#121212",
     fontSize: 20,
     marginBottom: 5,
   },
   subtext: {
-    color: '#FFFFFF',
+    color: "#121212",
     fontSize: 16,
     marginBottom: 30,
   },
   languageButtons: {
-    width: '100%',
+    width: "100%",
   },
   languageButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#333333',
+    borderBottomColor: "#EEEEEE",
   },
   selectedLanguage: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   languageButtonText: {
-    color: '#FFFFFF',
+    color: "#121212",
     fontSize: 18,
   },
   checkmark: {
     width: 20,
     height: 20,
-    resizeMode: 'contain',
+    resizeMode: "contain",
+    tintColor: "#121212",
   },
   infoContainer: {
     width,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
+    height,
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    paddingTop: 50,
   },
   infoImage: {
-    width: width * 0.7,
-    height: width * 0.7,
-    resizeMode: 'contain',
-    marginBottom: 30,
+    marginTop: 100,
+    // width: width * 0.7,
+    // height: width * 0.7,
+  },
+  infoTextContainer: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    padding: 20,
+    position: "absolute",
+    bottom: 0,
+    shadowColor: "#747474",
+    shadowOffset: { width: 2, height: -6 },
+    shadowOpacity: 1,
+    shadowRadius: 18,
+    elevation: 5,
   },
   infoTitle: {
-    color: '#FFFFFF',
+    color: "#121212",
     fontSize: 24,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 10,
   },
   infoSubtitle: {
-    color: '#FFFFFF',
+    color: "#121212",
     fontSize: 16,
-    textAlign: 'center',
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    position: 'absolute',
-    bottom: 100,
-    left: 0,
-    right: 0,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#555555',
-    marginHorizontal: 5,
-  },
-  activeDot: {
-    backgroundColor: '#FFFFFF',
-    width: 20,
+    textAlign: "center",
+    marginBottom: 20,
   },
   nextButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#000000",
     paddingVertical: 15,
-    position: 'absolute',
-    bottom: 40,
-    alignSelf: 'center',
+    borderRadius: 5,
   },
   nextButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 18,
     marginRight: 10,
   },
   buttonImage: {
     width: 20,
     height: 20,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   droneImage: {
     width: width,
     height: height * 0.3,
-    position: 'absolute',
+    position: "absolute",
     bottom: 80,
-    right: -60,
+    right: -70,
     zIndex: -1,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   sansBold: {
-    fontFamily: 'PublicSans-Bold',
+    fontFamily: "PublicSans-Bold",
   },
   sansMedium: {
-    fontFamily: 'PublicSans-Medium',
+    fontFamily: "PublicSans-Medium",
   },
   sansRegular: {
-    fontFamily: 'PublicSans-Regular',
+    fontFamily: "PublicSans-Regular",
   },
 });
 

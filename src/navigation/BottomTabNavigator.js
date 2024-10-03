@@ -5,6 +5,8 @@ import MyBookingsScreen from '../screens/MyBookingsScreen';
 import AccountScreen from '../screens/AccountScreen';
 import CustomTabBar from '../components/CustomTabBar';
 import Header from '../components/Header';
+import Recommendations from '../screens/Recommendations';
+
 
 const Tab = createBottomTabNavigator();
 
@@ -29,14 +31,21 @@ const BottomTabNavigator = () => {
         }}
       />
       <Tab.Screen 
-        name="My Bookings" 
+        name="Bookings" 
         component={MyBookingsScreen}
         options={{
           tabBarIcon: require('../../assets/bookings-icon.png')
         }}
       />
+       <Tab.Screen 
+        name="Spray Assist" 
+        component={Recommendations}
+        options={{
+          tabBarIcon: require('../../assets/recommendation.png')
+        }}
+      />
       <Tab.Screen 
-        name="Account" 
+        name="My Account" 
         component={AccountScreen}
         options={{
           tabBarIcon: require('../../assets/account-icon.png')
