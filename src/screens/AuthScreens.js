@@ -17,6 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { saveUserData } from "../../utils/auth";
 import axios from "axios";
 import { SvgXml } from "react-native-svg";
+import { Picker } from "@react-native-picker/picker";
 
 const backIconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M15 18L9 12L15 6" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -33,6 +34,8 @@ const AuthScreens = ({ navigation }) => {
   const [otpArray, setOtpArray] = useState(["", "", "", ""]);
   const inputRefs = useRef([]);
   const [aadhaarData, setAadhaarData] = useState(null);
+  const [vendors, setVendors] = useState([]);
+  const [selectedVendor, setSelectedVendor] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -50,60 +53,9 @@ const AuthScreens = ({ navigation }) => {
     profilePicPreview: null,
   });
 
-  const handleProfilePicUpload = async () => {
-    showLoader();
-    try {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-      });
-
-      if (!result.canceled) {
-        let localUri = result.assets[0].uri;
-        let filename = localUri.split("/").pop();
-        let match = /\.(\w+)$/.exec(filename);
-        let type = match ? `image/${match[1]}` : `image`;
-
-        let formData = new FormData();
-        formData.append("file", { uri: localUri, name: filename, type });
-
-        const response = await axios.post(
-          "http://192.168.177.62:5000/api/files/upload",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-
-        if (response.data && response.data.fileUrl) {
-          setFormData((prev) => ({
-            ...prev,
-            profilePic: response.data.fileUrl,
-            profilePicPreview: localUri,
-          }));
-          showToast(t("Profile picture uploaded successfully"), "success");
-        } else {
-          throw new Error("Invalid response from server");
-        }
-      }
-    } catch (error) {
-      console.error(
-        "Image upload error:",
-        error.response?.data || error.message
-      );
-      showToast(
-        t("Failed to upload profile picture: ") +
-          (error.response?.data?.message || error.message),
-        "error"
-      );
-    } finally {
-      hideLoader();
-    }
-  };
+  useEffect(() => {
+    fetchVendors();
+  }, []);
 
   useEffect(() => {
     if (aadhaarData) {
@@ -118,8 +70,23 @@ const AuthScreens = ({ navigation }) => {
       }));
     }
   }, [aadhaarData]);
+
+  const fetchVendors = async () => {
+    try {
+      const response = await ApiService.getAllVendors();
+      console.log(
+        response,
+        "response===============----------------->>>>>>>>>>>>>>>>>"
+      );
+      setVendors(response);
+    } catch (error) {
+      console.error("Error fetching vendors:", error);
+      showToast(t("Failed to fetch vendors"), "error");
+    }
+  };
+
   const resetFormData = (step) => {
-    if (step !== 5) {
+    if (step !== 6) {
       setFormData({
         name: "",
         email: "",
@@ -132,6 +99,8 @@ const AuthScreens = ({ navigation }) => {
         aadhaarBack: null,
         aadhaarNumber: "",
         aadhaarOtp: "",
+        profilePic: null,
+        profilePicPreview: null,
       });
     }
     setOtp("");
@@ -142,6 +111,7 @@ const AuthScreens = ({ navigation }) => {
     resetFormData(step);
     setSignupStep(step);
   };
+
   const validateForm = () => {
     const errors = {};
     if (!formData.name) errors.name = t("Name is required");
@@ -230,6 +200,12 @@ const AuthScreens = ({ navigation }) => {
             showToast(t("Invalid OTP"), "error");
           }
         } else if (signupStep === 3) {
+          if (!selectedVendor) {
+            showToast(t("Please select a vendor"), "error");
+            return;
+          }
+          setSignupStepWithReset(4);
+        } else if (signupStep === 4) {
           try {
             const aadhaarResponse = await ApiService.generateAadhaarOtp({
               aadhaarNumber: formData.aadhaarNumber,
@@ -241,14 +217,14 @@ const AuthScreens = ({ navigation }) => {
             if (aadhaarResponse.success) {
               setClientId(aadhaarResponse?.data?.client_id);
               showToast(t("Aadhaar OTP sent successfully"), "success");
-              setSignupStepWithReset(4);
+              setSignupStepWithReset(5);
             } else {
               showToast(t("Failed to send Aadhaar OTP"), "error");
             }
           } catch (error) {
             showToast(t("Error generating Aadhaar OTP"), "error");
           }
-        } else if (signupStep === 4) {
+        } else if (signupStep === 5) {
           try {
             const aadhaarVerifyResponse = await ApiService.submitAadhaarOtp({
               clientId: clientId,
@@ -256,22 +232,16 @@ const AuthScreens = ({ navigation }) => {
               mobileNumber: mobileNumber,
             });
             if (aadhaarVerifyResponse.success) {
-              console.log(
-                aadhaarVerifyResponse,
-                "aadhaarVerifyResponse.success"
-              );
               setAadhaarData(aadhaarVerifyResponse?.data?.data);
-
               showToast(t("Aadhaar verified successfully"), "success");
-              setSignupStepWithReset(5);
+              setSignupStepWithReset(6);
             } else {
               showToast(t("Failed to verify Aadhaar"), "error");
             }
           } catch (error) {
             showToast(t("Error verifying Aadhaar"), "error");
           }
-        }
-        if (signupStep === 5) {
+        } else if (signupStep === 6) {
           const errors = validateForm();
           if (errors) {
             Object.values(errors).forEach((error) => showToast(error, "error"));
@@ -286,7 +256,8 @@ const AuthScreens = ({ navigation }) => {
             village: formData.village,
             region: formData.regionField,
             aadhaarNumber: formData.aadhaarNumber,
-            profilePic: formData.profilePic, // Add this line
+            profilePic: formData.profilePic,
+            vendor: selectedVendor,
           });
           showToast(t("Runner registered successfully"), "success");
           setIsLogin(true);
@@ -321,7 +292,7 @@ const AuthScreens = ({ navigation }) => {
         formData.append("file", { uri: localUri, name: filename, type });
 
         const response = await axios.post(
-          "http://192.168.177.62:5000/api/files/upload",
+          "http://192.168.172.62:5000/api/files/upload",
           formData,
           {
             headers: {
@@ -348,6 +319,61 @@ const AuthScreens = ({ navigation }) => {
       );
       showToast(
         t("Failed to upload image: ") +
+          (error.response?.data?.message || error.message),
+        "error"
+      );
+    } finally {
+      hideLoader();
+    }
+  };
+
+  const handleProfilePicUpload = async () => {
+    showLoader();
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        let localUri = result.assets[0].uri;
+        let filename = localUri.split("/").pop();
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : `image`;
+
+        let formData = new FormData();
+        formData.append("file", { uri: localUri, name: filename, type });
+
+        const response = await axios.post(
+          "http://192.168.172.62:5000/api/files/upload",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        if (response.data && response.data.fileUrl) {
+          setFormData((prev) => ({
+            ...prev,
+            profilePic: response.data.fileUrl,
+            profilePicPreview: localUri,
+          }));
+          showToast(t("Profile picture uploaded successfully"), "success");
+        } else {
+          throw new Error("Invalid response from server");
+        }
+      }
+    } catch (error) {
+      console.error(
+        "Image upload error:",
+        error.response?.data || error.message
+      );
+      showToast(
+        t("Failed to upload profile picture: ") +
           (error.response?.data?.message || error.message),
         "error"
       );
@@ -450,12 +476,40 @@ const AuthScreens = ({ navigation }) => {
     </View>
   );
 
-  const renderAadhaarUpload = () => (
+  const renderVendorSelection = () => (
     <View style={styles.formContainer}>
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => setSignupStepWithReset(2)}
+        >
+          <SvgXml xml={backIconSvg} width="24" height="24" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>{t("Select Vendor")}</Text>
+      </View>
+      <Picker
+        selectedValue={selectedVendor}
+        onValueChange={(itemValue) => setSelectedVendor(itemValue)}
+        style={styles.picker}
+      >
+        <Picker.Item label={t("Select a vendor")} value="" />
+        {vendors.map((vendor) => (
+          <Picker.Item
+            key={vendor._id}
+            label={vendor.name}
+            value={vendor._id}
+          />
+        ))}
+      </Picker>
+    </View>
+  );
+
+  const renderAadhaarUpload = () => (
+    <View style={styles.formContainer}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => setSignupStepWithReset(3)}
         >
           <SvgXml xml={backIconSvg} width="24" height="24" />
         </TouchableOpacity>
@@ -516,7 +570,7 @@ const AuthScreens = ({ navigation }) => {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => setSignupStepWithReset(3)}
+          onPress={() => setSignupStepWithReset(4)}
         >
           <SvgXml xml={backIconSvg} width="24" height="24" />
         </TouchableOpacity>
@@ -537,7 +591,7 @@ const AuthScreens = ({ navigation }) => {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => setSignupStepWithReset(4)}
+          onPress={() => setSignupStepWithReset(5)}
         >
           <SvgXml xml={backIconSvg} width="24" height="24" />
         </TouchableOpacity>
@@ -677,8 +731,10 @@ const AuthScreens = ({ navigation }) => {
         : signupStep === 2
         ? renderOtpScreen()
         : signupStep === 3
-        ? renderAadhaarUpload()
+        ? renderVendorSelection()
         : signupStep === 4
+        ? renderAadhaarUpload()
+        : signupStep === 5
         ? renderAadhaarOtpScreen()
         : renderSignupForm()}
       <View style={styles.bottomContainer}>
@@ -730,7 +786,6 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     width: "100%",
-    // alignItems: "center",
     marginTop: 30,
     paddingHorizontal: 20,
     paddingBottom: 40,
@@ -847,7 +902,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   fullWidthInput: {
-    width: "100% !important",
+    width: "100vw",
     height: 50,
     borderWidth: 1,
     borderColor: "#CFCFCF",
@@ -937,6 +992,11 @@ const styles = StyleSheet.create({
   profilePicPlus: {
     fontSize: 40,
     color: "#808080",
+  },
+  picker: {
+    width: "100%",
+    height: 50,
+    marginBottom: 15,
   },
 });
 

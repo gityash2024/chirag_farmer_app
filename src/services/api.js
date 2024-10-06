@@ -2,7 +2,7 @@ import axios from "axios";
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_URL = "http://192.168.177.62:5000/api/runners"; // wifi
+const API_URL = "http://192.168.172.62:5000/api/runners"; // wifi
 
 const instance = axios.create({
   baseURL: API_URL,
@@ -164,6 +164,55 @@ const ApiService = {
   async getRatings() {
     try {
       const response = await instance.get("/ratings");
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+    }
+  },
+
+  async getAllVendors() {
+    try {
+      const response = await instance.get("/vendors");
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+    }
+  },
+
+  async getBookings() {
+    try {
+      const response = await instance.get("/v1");
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+    }
+  },
+
+  async updateBooking(id, data) {
+    try {
+      const response = await instance.put(`/v1/${id}`, data);
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+    }
+  },
+
+  // async uploadImage(formData) {
+  //   try {
+  //     const response = await instance.post("/files/upload", formData, {
+  //       headers: {
+  //         "Content-Type": "multipart/form-data",
+  //       },
+  //     });
+  //     return response.data;
+  //   } catch (error) {
+  //     this.handleError(error);
+  //   }
+  // },
+
+  async completeBooking(id, data) {
+    try {
+      const response = await instance.put(`/v1/${id}/complete`, data);
       return response.data;
     } catch (error) {
       this.handleError(error);
