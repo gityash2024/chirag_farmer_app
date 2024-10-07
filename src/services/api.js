@@ -197,19 +197,6 @@ const ApiService = {
     }
   },
 
-  // async uploadImage(formData) {
-  //   try {
-  //     const response = await instance.post("/files/upload", formData, {
-  //       headers: {
-  //         "Content-Type": "multipart/form-data",
-  //       },
-  //     });
-  //     return response.data;
-  //   } catch (error) {
-  //     this.handleError(error);
-  //   }
-  // },
-
   async completeBooking(id, data) {
     try {
       const response = await instance.put(`/v1/${id}/complete`, data);
