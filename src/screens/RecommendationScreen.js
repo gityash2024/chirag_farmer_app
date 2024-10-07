@@ -23,7 +23,10 @@ const RecommendationScreen = ({ route }) => {
         acceptedRecommendationsByRunner: true,
       });
       showToast("Recommendations accepted successfully");
-      navigation.navigate("ServiceDetails", { booking });
+      navigation.navigate("CompletedBookingDetails", {
+        booking,
+        fromRecommendation: true,
+      });
     } catch (error) {
       showToast("Error accepting recommendations");
     } finally {

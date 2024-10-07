@@ -150,14 +150,14 @@ const MyBookingsScreen = () => {
       style={styles.bookingCard}
       onPress={() => {
         switch (item.status) {
-          case "requested":
-            navigation.navigate("RequestedBookingDetails", { booking: item });
-            break;
           case "confirmed":
             navigation.navigate("ConfirmedBookingDetails", { booking: item });
             break;
           case "closed":
-            navigation.navigate("CompletedBookingDetails", { booking: item });
+            navigation.navigate("CompletedBookingDetails", {
+              booking: item,
+              fromRecommendation: false,
+            });
             break;
           case "started":
             showToast("Service already started");
